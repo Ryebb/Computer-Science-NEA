@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,9 @@ namespace NEA_prototype_V1._2
         #region references
         private System.Windows.Forms.Button Render;
         private System.Windows.Forms.TrackBar FOV;
+        private System.Windows.Forms.PictureBox PictureBox1;
         #endregion
+
         public Form1()
         {
             this.InitializeComponent();
@@ -46,11 +49,16 @@ namespace NEA_prototype_V1._2
             this.Render.Click += new System.EventHandler(this.Render_Click);
 
             this.FOV = new System.Windows.Forms.TrackBar();
-            this.FOV.Location= new System.Drawing.Point(180, 200);
+            this.FOV.Location= new System.Drawing.Point(180, 410);
             this.FOV.Name = "FOV";
             this.FOV.Size = new System.Drawing.Size(100, 50);
 
+            this.PictureBox1 = new System.Windows.Forms.PictureBox();v
+            this.PictureBox1.Location = new System.Drawing.Point(10, 10);
+            this.PictureBox1.Size = new System.Drawing.Size(800, 450);
+
             this.Controls.AddRange(new System.Windows.Forms.Control[] { this.Render,
+                    this.PictureBox1
                     this.FOV});
         }
 
