@@ -21,12 +21,15 @@ namespace NEA_prototype_V1._2
         private System.Windows.Forms.TrackBar FOVSlider;
         private System.Windows.Forms.TrackBar depthSlider;
         private System.Windows.Forms.PictureBox PictureBox1;
+        private System.Windows.Forms.Label FOVLabel;
+        private System.Windows.Forms.Label depthLabel;
         #endregion
 
         public Form1()
         {
             this.InitializeComponent();
             this.InitializeComponent2();
+            this.BackColor = ColorTranslator.FromHtml("#181f1a");
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "NEA Prototype UI";
             this.Load += new EventHandler(Form1_Load);
@@ -71,21 +74,36 @@ namespace NEA_prototype_V1._2
             #region FOV Controls
             this.FOVSlider = new System.Windows.Forms.TrackBar();
             this.FOVSlider.Location = new System.Drawing.Point(850, 400);
-            this.FOVSlider.Name = "FOV";
+            this.FOVSlider.Name = "FOVSlider";
             this.FOVSlider.Size = new System.Drawing.Size(250, 50);
             this.FOVSlider.Minimum = 10;
             this.FOVSlider.Maximum = 150;
             this.FOVSlider.Value = 70;
+            this.FOVSlider.Scroll += new System.EventHandler(FOVSlider_Changed);
+
+            this.FOVLabel = new System.Windows.Forms.Label();
+            this.FOVLabel.Location = new System.Drawing.Point(850, 380);
+            this.FOVLabel.Font = new Font("Bahnschrift SemiBold", 7);
+            this.FOVLabel.ForeColor = Color.White;
+            this.FOVLabel.Text = $"Current FOV: {FOVSlider.Value}";
             #endregion
 
             #region Image Depth Controls
             this.depthSlider = new System.Windows.Forms.TrackBar();
-            this.depthSlider.Location = new System.Drawing.Point(850, 350);
-            this.depthSlider.Name = "Depth";
+            this.depthSlider.Location = new System.Drawing.Point(850, 320);
+            this.depthSlider.Name = "depthSlider";
             this.depthSlider.Size = new System.Drawing.Size(250, 50);
             this.depthSlider.Minimum = 1;
             this.depthSlider.Maximum = 10;
             this.depthSlider.Value = 3;
+            this.depthSlider.Scroll += new System.EventHandler(depthSlider_Changed);
+
+            this.depthLabel = new System.Windows.Forms.Label();
+            this.depthLabel.Location = new System.Drawing.Point(850, 300);
+            this.depthSlider.AutoSize = true;
+            this.depthLabel.Font = new Font("Bahnschrift SemiBold", 7);
+            this.depthLabel.ForeColor = Color.White;
+            this.depthLabel.Text = $"Current Image Depth: {depthSlider.Value}";
             #endregion
 
             Graphics g = this.CreateGraphics();
@@ -99,7 +117,9 @@ namespace NEA_prototype_V1._2
             this.Controls.AddRange(new System.Windows.Forms.Control[] { this.Render,
                 this.testButton,
                 this.PictureBox1,
+                this.depthLabel,
                 this.depthSlider,
+                this.FOVLabel,
                 this.FOVSlider});
         }
 
@@ -127,5 +147,23 @@ namespace NEA_prototype_V1._2
             this.PictureBox1.Image = bmp;
         }
 
+        private void FOVSlider_Changed(object sender, EventArgs e)
+        {
+            this.FOVLabel.Text = $"Current FOV: {FOVSlider.Value}";
+        }
+
+        private void depthSlider_Changed(object sender, EventArgs e)
+        {
+            this.depthLabel.Text = $"Current Image Depth: {depthSlider.Value}";
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            Console.WriteLine("You pressed " + e.KeyCode);
+            if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.NumPad0)
+            {
+                this.Close();
+            }
+        }
     }
 }
