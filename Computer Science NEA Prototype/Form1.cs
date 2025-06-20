@@ -23,6 +23,7 @@ namespace NEA_prototype_V1._2
         private System.Windows.Forms.PictureBox PictureBox1;
         private System.Windows.Forms.Label FOVLabel;
         private System.Windows.Forms.Label depthLabel;
+        private System.Windows.Forms.ProgressBar RenderProgress;
         #endregion
 
         public Form1()
@@ -103,7 +104,7 @@ namespace NEA_prototype_V1._2
             this.depthSlider.AutoSize = true;
             this.depthLabel.Font = new Font("Bahnschrift SemiBold", 7);
             this.depthLabel.ForeColor = Color.White;
-            this.depthLabel.Text = $"Current Image Depth: {depthSlider.Value}";
+            this.depthLabel.Text = $"Image Depth: {depthSlider.Value}";
             #endregion
 
             Graphics g = this.CreateGraphics();
@@ -117,6 +118,7 @@ namespace NEA_prototype_V1._2
             this.Controls.AddRange(new System.Windows.Forms.Control[] { this.Render,
                 this.testButton,
                 this.PictureBox1,
+                this.RenderProgress,
                 this.depthLabel,
                 this.depthSlider,
                 this.FOVLabel,
@@ -137,14 +139,32 @@ namespace NEA_prototype_V1._2
         {
             Graphics g = this.CreateGraphics();
             Bitmap bmp = new Bitmap(800, 450, g);
-            for (int i = 0; i < bmp.Width; i++)
+
+            #region Progress Bar
+            this.RenderProgress = new System.Windows.Forms.ProgressBar();
+            this.RenderProgress.Visible = true;
+            this.RenderProgress.Minimum = 1;
+            this.RenderProgress.Maximum = bmp.Height;
+            this.RenderProgress.Value = 1;
+            this.RenderProgress.Step = 1;
+            this.RenderProgress.Location = new System.Drawing.Point(850, 494);
+            this.RenderProgress.Size = new System.Drawing.Size(280, 34);
+
+            this.testButton.Visible = false;
+            this.Controls.Add(RenderProgress);
+            #endregion
+
+            for (int i = 0; i < bmp.Height; i++)
             {
-                for (int j = 0; j < bmp.Height; j++)
+                for (int j = 0; j < bmp.Width; j++)
                 {
-                    bmp.SetPixel(i, j, Color.FromArgb(Convert.ToInt32(j / 2), Convert.ToInt32(i / 4), 255 - Convert.ToInt32(j / 2)));
+                    bmp.SetPixel(j, i, Color.FromArgb(255 - Convert.ToInt32(j / 4), Convert.ToInt32(i / 2), Convert.ToInt32(j / 4)));
                 }
+                this.RenderProgress.PerformStep();
             }
             this.PictureBox1.Image = bmp;
+            this.RenderProgress.Visible = false;
+            this.testButton.Visible = true;
         }
 
         private void FOVSlider_Changed(object sender, EventArgs e)
@@ -154,7 +174,7 @@ namespace NEA_prototype_V1._2
 
         private void depthSlider_Changed(object sender, EventArgs e)
         {
-            this.depthLabel.Text = $"Current Image Depth: {depthSlider.Value}";
+            this.depthLabel.Text = $"Image Depth: {depthSlider.Value}";
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
