@@ -19,6 +19,12 @@ namespace NEA_prototype_V1._2
             dir = direction;
         }
 
+        public Vec3 Dir
+        { get => dir; set => dir = value; }
+
+        public Point3 Orig
+        { get => orig; set => orig = value; }
+
         public Point3 At(double t)
         {
             return orig.Add(dir.Scalar_Multiply(t));

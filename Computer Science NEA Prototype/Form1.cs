@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using Point3 = Vec3;
+using Colour3 = Vec3;
 
 //NOTES:
 
@@ -114,8 +115,8 @@ namespace NEA_prototype_V1._2
             depthLabel.Text = $"Image Depth: {depthSlider.Value}";
             #endregion
 
-            Graphics g = CreateGraphics();
-            Bitmap bmp = new Bitmap(100, 100, g);
+            Graphics graphics = CreateGraphics();
+            Bitmap bmp = new Bitmap(100, 100, graphics);
 
             PictureBox1 = new System.Windows.Forms.PictureBox();
             PictureBox1.Location = new System.Drawing.Point(10, 10);
@@ -132,10 +133,18 @@ namespace NEA_prototype_V1._2
                 FOVSlider});
         }
 
+        private Colour3 Ray_Colour(Ray r)
+        {
+            //Performs a lerp between 2 values (0 and 1) for the gradient (should multiply by 255 at the end) 
+            Vec3 unit_direction = r.Dir.Unit_Vector();
+            double a = 0.5 * (unit_direction.Y + 1.0);
+            return new Colour3(1.0, 1.0, 1.0).Scalar_Multiply(1.0 - a).Add(new Colour3(0.5, 0.7, 1.0).Scalar_Multiply(a));
+        }
+
         private void Render_Click(object sender, EventArgs e)
         {
-            double aspect_ratio = 16 / 9;
-            int image_width = 400;
+            double aspect_ratio = (16.0 / 9.0);
+            int image_width = 800;
             int image_height = Convert.ToInt32(image_width / aspect_ratio); //Add a check in case height is ever less than 1
 
             #region Progress Bar
@@ -145,15 +154,15 @@ namespace NEA_prototype_V1._2
             RenderProgress.Maximum = image_height;
             RenderProgress.Value = 1;
             RenderProgress.Step = 1;
-            RenderProgress.Location = new System.Drawing.Point(850, 494);
+            RenderProgress.Location = new System.Drawing.Point(850, 460);
             RenderProgress.Size = new System.Drawing.Size(280, 34);
 
-            testButton.Visible = false;
+            Render.Visible = false;
             Controls.Add(RenderProgress);
             #endregion
 
             #region Camera Setup
-            double focal_length = 1;
+            double focal_length = 1.0;
             Point3 camera_centre = new Point3(0, 0, 0);
             double viewport_height = 2.0;
             double viewport_width = viewport_width = viewport_height * (Convert.ToDouble(image_width) / image_height);
@@ -165,13 +174,20 @@ namespace NEA_prototype_V1._2
 
             //calculate the vectors that represent the change between each pixel of the viewport
             Vec3 pixel_d_a = viewport_a.Scalar_Divide(image_width);
-            Vec3 pixel_d_b = viewport_b.Scalar_Divide(image_width);
+            Vec3 pixel_d_b = viewport_b.Scalar_Divide(image_height);
 
             // Calculate the location of the upper left pixel.
             Point3 viewport_upper_left = camera_centre.Subtract(new Vec3(0, 0, focal_length).Subtract(viewport_a.Scalar_Divide(2).Subtract(viewport_b.Scalar_Divide(2))));
             Point3 pixel0_loc = viewport_upper_left.Add((pixel_d_a.Add(pixel_d_b).Scalar_Multiply(0.5)));
 
             //RENDER!!!!!!
+            Graphics graphics = this.CreateGraphics();
+            Bitmap bmp = new Bitmap(image_width, image_height, graphics);
+
+            int r;
+            int g;
+            int b;
+
             for (int j = 0; j < image_height; j++)
             {
                 for (int i = 0; i < image_width; i++)
@@ -180,8 +196,13 @@ namespace NEA_prototype_V1._2
                     Vec3 ray_direction = pixel_center.Subtract(camera_centre);
                     Ray ray = new Ray(camera_centre, ray_direction);
 
-                    //color pixel_color = ray_color(r);
+                    Colour3 pixel_color = Ray_Colour(ray);
                     //write_color(std::cout, pixel_color);
+                    r = Convert.ToInt32(255 * pixel_color.X);
+                    g = Convert.ToInt32(255 * pixel_color.Y);
+                    b = Convert.ToInt32(255 * pixel_color.Z);
+
+                    bmp.SetPixel(i, j, Color.FromArgb(r, g, b));
                 }
                 RenderProgress.PerformStep();
             }
@@ -190,9 +211,10 @@ namespace NEA_prototype_V1._2
 
 
             //Progress Bar End
-            //PictureBox1.Image = bmp;
+            PictureBox1.Image = bmp;
             RenderProgress.Visible = false;
-            testButton.Visible = true;
+            Controls.Remove(RenderProgress);
+            Render.Visible = true;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -202,8 +224,8 @@ namespace NEA_prototype_V1._2
 
         private void RenderTestImage(object sender,  EventArgs e)
         {
-            Graphics g = this.CreateGraphics();
-            Bitmap bmp = new Bitmap(800, 450, g);
+            Graphics graphics = this.CreateGraphics();
+            Bitmap bmp = new Bitmap(800, 450, graphics);
 
             #region Progress Bar
             RenderProgress = new System.Windows.Forms.ProgressBar();
@@ -229,6 +251,7 @@ namespace NEA_prototype_V1._2
             }
             PictureBox1.Image = bmp;
             RenderProgress.Visible = false;
+            Controls.Remove(RenderProgress);
             testButton.Visible = true;
         }
 
