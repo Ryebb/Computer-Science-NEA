@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using Vector3 = Vec3;
 using Point3 = Vec3;
 using Colour3 = Vec3;
 
@@ -118,12 +119,12 @@ namespace NEA_prototype_V1._2
             Graphics graphics = CreateGraphics();
             Bitmap bmp = new Bitmap(100, 100, graphics);
 
-            PictureBox1 = new System.Windows.Forms.PictureBox();
-            PictureBox1.Location = new System.Drawing.Point(10, 10);
-            PictureBox1.Size = new System.Drawing.Size(800, 450);
+            PictureBox1 = new PictureBox();
+            PictureBox1.Location = new Point(10, 10);
+            PictureBox1.Size = new Size(800, 450);
             PictureBox1.Image = bmp;
 
-            Controls.AddRange(new System.Windows.Forms.Control[] { Render,
+            Controls.AddRange(new Control[] { Render,
                 testButton,
                 PictureBox1,
                 RenderProgress,
@@ -133,26 +134,59 @@ namespace NEA_prototype_V1._2
                 FOVSlider});
         }
 
-        private bool hit_sphere(Point3 centre, double radius, Ray r)
+        private double hit_sphere(Point3 centre, double radius, Ray r)
         {
             Point3 oc = centre.Subtract(r.Orig);
             double a = r.Dir.Dot(r.Dir);
             double b = -2.0 * r.Dir.Dot(oc);
             double c = oc.Dot(oc) - Math.Pow(radius, 2);
             double discriminant = Math.Pow(b, 2) - 4 * a * c;
-            return discriminant >= 0;
+            //if (discriminant >= -10) MessageBox.Show(Convert.ToString(discriminant));
+            if (discriminant < 0)
+            {
+                return -1.0;
+            }
+            else
+            {
+                return (- b - Math.Sqrt(discriminant)) / 2.0 * a;
+            }
         }
-        
+
+        private double hit_saddle(Point3 centre, double radius, Ray r)
+        {
+            Point3 oc = centre.Subtract(r.Orig);
+            double a = Math.Pow(r.Dir.X, 2) - Math.Pow(r.Dir.Y, 2);
+            double b = 2.0 * (r.Dir.X * r.Orig.X - r.Dir.Y * r.Orig.Y) - r.Dir.X;
+            double c = Math.Pow(r.Orig.X, 2) - Math.Pow(r.Orig.Y, 2) - r.Orig.Z;
+            double discriminant = Math.Pow(b, 2) - 4 * a * c;
+            //if (discriminant >= -10) MessageBox.Show(Convert.ToString(discriminant));
+            if (discriminant < 0 || ((-1 < r.Dir.X && r.Dir.X < 1)))
+            {
+                return -1.0;
+            }
+            else
+            {
+                return 2 * r.Dir.Z - 2 * r.Dir.X - 2 * r.Dir.Y;
+                //return 1.0;
+            }
+        }
+
 
 
         private Colour3 Ray_Colour(Ray r)
         {
-            if (hit_sphere(new Point3(0, 0, -1), 0.5, r))
-            { return new Colour3(1, 0, 0); }
+            //double surface_point = hit_sphere(new Point3(0, 0, -1), 0.5, r);
+            double surface_point = hit_saddle(new Point3(0, 0, -1), 0.5, r);
+            if (surface_point > 0.0)
+            {
+                Vector3 N = r.At(surface_point).Subtract(new Vector3 (0, 0, -1)).Unit_Vector(); //N is a unit vector where only the directions are varied in relation to the surface normals
+                return new Colour3(N.X + 1, N.Y + 1, N.Z + 1).Scalar_Divide(2);
+                //return new Colour3(1, 0, 0);
+            }
             else
             {
                 //Performs a lerp between 2 values (0 and 1) for the gradient (should multiply by 255 at the end) 
-                Vec3 unit_direction = r.Dir.Unit_Vector();
+                Vector3 unit_direction = r.Dir.Unit_Vector();
                 double a = 0.5 * (unit_direction.Y + 1.0);
                 return new Colour3(1.0, 1.0, 1.0).Scalar_Multiply(1.0 - a).Add(new Colour3(0.5, 0.7, 1.0).Scalar_Multiply(a));
             }
@@ -165,14 +199,14 @@ namespace NEA_prototype_V1._2
             int image_height = Convert.ToInt32(image_width / aspect_ratio); //Add a check in case height is ever less than 1
 
             #region Progress Bar
-            RenderProgress = new System.Windows.Forms.ProgressBar();
+            RenderProgress = new ProgressBar();
             RenderProgress.Visible = true;
             RenderProgress.Minimum = 1;
             RenderProgress.Maximum = image_height;
             RenderProgress.Value = 1;
             RenderProgress.Step = 1;
-            RenderProgress.Location = new System.Drawing.Point(850, 460);
-            RenderProgress.Size = new System.Drawing.Size(280, 34);
+            RenderProgress.Location = new Point(850, 460);
+            RenderProgress.Size = new Size(280, 34);
 
             Render.Visible = false;
             Controls.Add(RenderProgress);
@@ -186,15 +220,15 @@ namespace NEA_prototype_V1._2
             #endregion
 
             //horizontal and vertical vectors for viewport
-            Vec3 viewport_a = new Vec3(viewport_width, 0, 0);
-            Vec3 viewport_b = new Vec3(0, -viewport_height, 0);
+            Vector3 viewport_a = new Vector3(viewport_width, 0, 0);
+            Vector3 viewport_b = new Vector3(0, -viewport_height, 0);
 
             //calculate the vectors that represent the change between each pixel of the viewport
-            Vec3 pixel_d_a = viewport_a.Scalar_Divide(image_width);
-            Vec3 pixel_d_b = viewport_b.Scalar_Divide(image_height);
+            Vector3 pixel_d_a = viewport_a.Scalar_Divide(image_width);
+            Vector3 pixel_d_b = viewport_b.Scalar_Divide(image_height);
 
             // Calculate the location of the upper left pixel.
-            Point3 viewport_upper_left = camera_centre.Subtract(new Vec3(0, 0, focal_length).Subtract(viewport_a.Scalar_Divide(2).Subtract(viewport_b.Scalar_Divide(2))));
+            Point3 viewport_upper_left = camera_centre.Subtract(new Vector3(0, 0, focal_length)).Subtract(viewport_a.Scalar_Divide(2)).Subtract(viewport_b.Scalar_Divide(2));
             Point3 pixel0_loc = viewport_upper_left.Add((pixel_d_a.Add(pixel_d_b).Scalar_Multiply(0.5)));
 
             //RENDER!!!!!!
@@ -210,11 +244,10 @@ namespace NEA_prototype_V1._2
                 for (int i = 0; i < image_width; i++)
                 {
                     Point3 pixel_center = pixel0_loc.Add(pixel_d_a.Scalar_Multiply(i)).Add(pixel_d_b.Scalar_Multiply(j));
-                    Vec3 ray_direction = pixel_center.Subtract(camera_centre);
+                    Vector3 ray_direction = pixel_center.Subtract(camera_centre);
                     Ray ray = new Ray(camera_centre, ray_direction);
 
                     Colour3 pixel_color = Ray_Colour(ray);
-                    //write_color(std::cout, pixel_color);
                     r = Convert.ToInt32(255 * pixel_color.X);
                     g = Convert.ToInt32(255 * pixel_color.Y);
                     b = Convert.ToInt32(255 * pixel_color.Z);

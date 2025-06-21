@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Point3 = Vec3;
 
 namespace NEA_prototype_V1._2
 {

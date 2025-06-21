@@ -5,6 +5,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Vector3 = Vec3;
 using Point3 = Vec3;
 
 namespace NEA_prototype_V1._2
@@ -12,14 +13,14 @@ namespace NEA_prototype_V1._2
     class Ray
     {
         private Point3 orig;
-        private Vec3 dir;
-        public Ray(Point3 origin, Vec3 direction)
+        private Vector3 dir;
+        public Ray(Point3 origin, Vector3 direction)
         {
             orig = origin;
             dir = direction;
         }
 
-        public Vec3 Dir
+        public Vector3 Dir
         { get => dir; set => dir = value; }
 
         public Point3 Orig
