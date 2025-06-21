@@ -17,6 +17,13 @@ public class Vec3
     private double y;
     private double z;
 
+    public Vec3()
+    {
+        x = 0;
+        y = 0;
+        z = 0;
+    }
+
     public Vec3(double x, double y, double z)
 	{
         this.x = x;
@@ -24,33 +31,48 @@ public class Vec3
         this.z = z;
 	}
 
-    public Vec3 Add(Vec3 a, Vec3 b)
-    {
-        Vec3 result = new Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
-        return result;
-    }
+    public double X
+    { get => x; set => x = value; }
 
-    public Vec3 Subtract(Vec3 a, Vec3 b)
-    {
-        Vec3 result = new Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
-        return result;
-    }
+    public double Y
+    { get => y; set => y = value; }
 
-    public Vec3 Scalar_Multiply(Vec3 a, int b)
-    {
-        Vec3 result = new Vec3(a.x * b, a.y * b, a.z * b);
-        return result;
-    }
+    public double Z
+    { get => z; set => z = value; }
 
-    public Vec3 Scalar_Divide(Vec3 a, int b)
-    {
-        Vec3 result = new Vec3(a.x * (1 / b), a.y * (1 / b), a.z * (1 / b));
-        return result;
-    }
+    public Vec3 Negate()
+    { return new Vec3(-x, -y, -z); }
 
-    public double Length(Vec3 a)
+    public Vec3 Add(Vec3 a)
+    { return new Vec3(x + a.x, y + a.y, z + a.z); }
+
+    public Vec3 Subtract(Vec3 a)
+    { return new Vec3(x - a.x, y - a.y, z - a.z); }
+
+    public Vec3 Scalar_Multiply(double a)
+    { return new Vec3(x * a, y * a, z * a); }
+
+    public Vec3 Scalar_Divide(double a)
+    { return new Vec3(x * (1 / a), y * (1 / a), z * (1 / a)); }
+
+    public double Length()
+    { return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2) + Math.Pow(z, 2)); }
+
+    public double Squared_Length()
+    { return Math.Pow(x, 2) + Math.Pow(y, 2) + Math.Pow(z, 2); }
+
+    public double Dot(Vec3 a)
+    { return x * a.x + y * a.y + z * a.z; }
+
+    public Vec3 Cross(Vec3 a)
+    { return new Vec3(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.z); }
+
+    public Vec3 Hadamard(Vec3 a)
+    { return new Vec3 (x * a.x, y * a.y, z * a.z); }
+
+    public Vec3 Unit_Vector()
     {
-        double result = Math.Sqrt(Math.Pow(a.x, 2) + Math.Pow(a.y, 2) + Math.Pow(a.z, 2));
-        return result;
+        Scalar_Divide(Length());
+        return this;
     }
 }
