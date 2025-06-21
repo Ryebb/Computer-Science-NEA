@@ -5,11 +5,13 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using Point3 = Vec3;
 
 //NOTES:
 
@@ -132,7 +134,65 @@ namespace NEA_prototype_V1._2
 
         private void Render_Click(object sender, EventArgs e)
         {
+            double aspect_ratio = 16 / 9;
+            int image_width = 400;
+            int image_height = Convert.ToInt32(image_width / aspect_ratio); //Add a check in case height is ever less than 1
 
+            #region Progress Bar
+            RenderProgress = new System.Windows.Forms.ProgressBar();
+            RenderProgress.Visible = true;
+            RenderProgress.Minimum = 1;
+            RenderProgress.Maximum = image_height;
+            RenderProgress.Value = 1;
+            RenderProgress.Step = 1;
+            RenderProgress.Location = new System.Drawing.Point(850, 494);
+            RenderProgress.Size = new System.Drawing.Size(280, 34);
+
+            testButton.Visible = false;
+            Controls.Add(RenderProgress);
+            #endregion
+
+            #region Camera Setup
+            double focal_length = 1;
+            Point3 camera_centre = new Point3(0, 0, 0);
+            double viewport_height = 2.0;
+            double viewport_width = viewport_width = viewport_height * (Convert.ToDouble(image_width) / image_height);
+            #endregion
+
+            //horizontal and vertical vectors for viewport
+            Vec3 viewport_a = new Vec3(viewport_width, 0, 0);
+            Vec3 viewport_b = new Vec3(0, -viewport_height, 0);
+
+            //calculate the vectors that represent the change between each pixel of the viewport
+            Vec3 pixel_d_a = viewport_a.Scalar_Divide(image_width);
+            Vec3 pixel_d_b = viewport_b.Scalar_Divide(image_width);
+
+            // Calculate the location of the upper left pixel.
+            Point3 viewport_upper_left = camera_centre.Subtract(new Vec3(0, 0, focal_length).Subtract(viewport_a.Scalar_Divide(2).Subtract(viewport_b.Scalar_Divide(2))));
+            Point3 pixel0_loc = viewport_upper_left.Add((pixel_d_a.Add(pixel_d_b).Scalar_Multiply(0.5)));
+
+            //RENDER!!!!!!
+            for (int j = 0; j < image_height; j++)
+            {
+                for (int i = 0; i < image_width; i++)
+                {
+                    Point3 pixel_center = pixel0_loc.Add(pixel_d_a.Scalar_Multiply(i)).Add(pixel_d_b.Scalar_Multiply(j));
+                    Vec3 ray_direction = pixel_center.Subtract(camera_centre);
+                    Ray ray = new Ray(camera_centre, ray_direction);
+
+                    //color pixel_color = ray_color(r);
+                    //write_color(std::cout, pixel_color);
+                }
+                RenderProgress.PerformStep();
+            }
+
+
+
+
+            //Progress Bar End
+            //PictureBox1.Image = bmp;
+            RenderProgress.Visible = false;
+            testButton.Visible = true;
         }
 
         private void Form1_Load(object sender, EventArgs e)
