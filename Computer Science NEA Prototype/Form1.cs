@@ -133,12 +133,29 @@ namespace NEA_prototype_V1._2
                 FOVSlider});
         }
 
+        private bool hit_sphere(Point3 centre, double radius, Ray r)
+        {
+            Point3 oc = centre.Subtract(r.Orig);
+            double a = r.Dir.Dot(r.Dir);
+            double b = -2.0 * r.Dir.Dot(oc);
+            double c = oc.Dot(oc) - Math.Pow(radius, 2);
+            double discriminant = Math.Pow(b, 2) - 4 * a * c;
+            return discriminant >= 0;
+        }
+        
+
+
         private Colour3 Ray_Colour(Ray r)
         {
-            //Performs a lerp between 2 values (0 and 1) for the gradient (should multiply by 255 at the end) 
-            Vec3 unit_direction = r.Dir.Unit_Vector();
-            double a = 0.5 * (unit_direction.Y + 1.0);
-            return new Colour3(1.0, 1.0, 1.0).Scalar_Multiply(1.0 - a).Add(new Colour3(0.5, 0.7, 1.0).Scalar_Multiply(a));
+            if (hit_sphere(new Point3(0, 0, -1), 0.5, r))
+            { return new Colour3(1, 0, 0); }
+            else
+            {
+                //Performs a lerp between 2 values (0 and 1) for the gradient (should multiply by 255 at the end) 
+                Vec3 unit_direction = r.Dir.Unit_Vector();
+                double a = 0.5 * (unit_direction.Y + 1.0);
+                return new Colour3(1.0, 1.0, 1.0).Scalar_Multiply(1.0 - a).Add(new Colour3(0.5, 0.7, 1.0).Scalar_Multiply(a));
+            }
         }
 
         private void Render_Click(object sender, EventArgs e)
