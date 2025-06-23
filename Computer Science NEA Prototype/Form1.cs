@@ -166,7 +166,7 @@ namespace NEA_prototype_V1._2
             }
             else
             {
-                return 2 * r.Dir.Z - 2 * r.Dir.X - 2 * r.Dir.Y;
+                return 2 * r.Dir.X - 2 * r.Dir.Y - 1;
                 //return 1.0;
             }
         }
@@ -252,7 +252,7 @@ namespace NEA_prototype_V1._2
                     g = Convert.ToInt32(255 * pixel_color.Y);
                     b = Convert.ToInt32(255 * pixel_color.Z);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(r, g, b));
+                    if ((r > 0 && g > 0 && b > 0) && (r < 256 && g < 256 && b < 256)) bmp.SetPixel(i, j, Color.FromArgb(r, g, b));
                 }
                 RenderProgress.PerformStep();
             }
