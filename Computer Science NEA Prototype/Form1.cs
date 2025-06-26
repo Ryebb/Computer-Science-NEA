@@ -176,7 +176,7 @@ namespace NEA_prototype_V1._2
         private Colour3 Ray_Colour(Ray r)
         {
             //double surface_point = hit_sphere(new Point3(0, 0, -1), 0.5, r);
-            double surface_point = hit_saddle(new Point3(0, 0, -1), 0.5, r);
+            double surface_point = hit_sphere(new Point3(0, 0, -1), 0.5, r);
             if (surface_point > 0.0)
             {
                 Vector3 N = r.At(surface_point).Subtract(new Vector3 (0, 0, -1)).Unit_Vector(); //N is a unit vector where only the directions are varied in relation to the surface normals
@@ -323,6 +323,14 @@ namespace NEA_prototype_V1._2
                 Close();
             }
             //"Trace rays" - Fran Irving Garey, June 20 2025
+        }
+
+        private void Form1_KeyDown_1(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.NumPad0)
+            {
+                Render_Click(sender, e);
+            }
         }
     }
 }
