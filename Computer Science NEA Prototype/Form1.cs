@@ -14,6 +14,7 @@ using System.Xml;
 using Vector3 = Vec3;
 using Point3 = Vec3;
 using Colour3 = Vec3;
+using Matrix1 = Vec3;
 
 //NOTES:
 
@@ -155,19 +156,23 @@ namespace NEA_prototype_V1._2
         private double hit_saddle(Point3 centre, double radius, Ray r)
         {
             Point3 oc = centre.Subtract(r.Orig);
-            double a = Math.Pow(r.Dir.X, 2) - Math.Pow(r.Dir.Y, 2);
-            double b = 2.0 * (r.Dir.X * r.Orig.X - r.Dir.Y * r.Orig.Y) - r.Dir.X;
-            double c = Math.Pow(r.Orig.X, 2) - Math.Pow(r.Orig.Y, 2) - r.Orig.Z;
-            double discriminant = Math.Pow(b, 2) - 4 * a * c;
+            //given equation x^t A x + B^t x + C, we should define A, B and C
+            Matrix3 A = new Matrix3(1, 0, 0, 0, -1, 0, 0, 0, 0);
+            Matrix1 B = new Matrix1(0, 0, -1);
+            double C = centre.X + centre.Y + centre.Z;
+            //given b^2 - 4ac discriminant, to define a b and c:
+            double a = A.Pre_Multiply(r.Dir).Dot(r.Dir);
+            double b = 2.0 * (A.Pre_Multiply(r.Dir).Dot(r.Orig)) + B.Dot(r.Dir);
+            double c = A.Pre_Multiply(r.Orig).Dot(r.Orig) + B.Dot(r.Orig) + C;
+            double discriminant = b * b - 4 * a * c;
             //if (discriminant >= -10) MessageBox.Show(Convert.ToString(discriminant));
-            if (discriminant < 0 || ((-1 < r.Dir.X && r.Dir.X < 1)))
+            if (discriminant < 0)
             {
                 return -1.0;
             }
             else
             {
-                return 2 * r.Dir.X - 2 * r.Dir.Y - 1;
-                //return 1.0;
+                return (-b - Math.Sqrt(discriminant)) / 2.0 * a;
             }
         }
 
@@ -176,12 +181,18 @@ namespace NEA_prototype_V1._2
         private Colour3 Ray_Colour(Ray r)
         {
             //double surface_point = hit_sphere(new Point3(0, 0, -1), 0.5, r);
-            double surface_point = hit_sphere(new Point3(0, 0, -1), 0.5, r);
+            double surface_point = hit_saddle(new Point3(0, 0, -1), 0.5, r);
             if (surface_point > 0.0)
             {
-                Vector3 N = r.At(surface_point).Subtract(new Vector3 (0, 0, -1)).Unit_Vector(); //N is a unit vector where only the directions are varied in relation to the surface normals
+                //where N is the normalised surface normal vector for a sphere
+                //Vector3 N = r.At(surface_point).Subtract(new Vector3 (0, 0, -1)).Unit_Vector();
+
+                //where N is the normalised surface normal vector for a sphere
+                Point3 hit_point = r.At(surface_point);
+                Vector3 N = new Vector3(2*hit_point.X,,).Unit_Vector();
+
+                //return as colour
                 return new Colour3(N.X + 1, N.Y + 1, N.Z + 1).Scalar_Divide(2);
-                //return new Colour3(1, 0, 0);
             }
             else
             {
@@ -252,7 +263,7 @@ namespace NEA_prototype_V1._2
                     g = Convert.ToInt32(255 * pixel_color.Y);
                     b = Convert.ToInt32(255 * pixel_color.Z);
 
-                    if ((r > 0 && g > 0 && b > 0) && (r < 256 && g < 256 && b < 256)) bmp.SetPixel(i, j, Color.FromArgb(r, g, b));
+                    if ((r >= 0 && g >= 0 && b >= 0) && (r < 256 && g < 256 && b < 256)) bmp.SetPixel(i, j, Color.FromArgb(r, g, b));
                 }
                 RenderProgress.PerformStep();
             }
