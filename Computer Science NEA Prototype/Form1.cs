@@ -153,7 +153,7 @@ namespace NEA_prototype_V1._2
             }
         }
 
-        private double hit_saddle(Point3 centre, double radius, Ray r)
+        private double hit_pringle(Point3 centre, double radius, Ray r)
         {
             Point3 oc = centre.Subtract(r.Orig);
             //given equation x^t A x + B^t x + C, we should define A, B and C
@@ -181,7 +181,7 @@ namespace NEA_prototype_V1._2
         private Colour3 Ray_Colour(Ray r)
         {
             //double surface_point = hit_sphere(new Point3(0, 0, -1), 0.5, r);
-            double surface_point = hit_saddle(new Point3(0, 0, -1), 0.5, r);
+            double surface_point = hit_pringle(new Point3(0, 0, -1), 0.5, r);
             if (surface_point > 0.0)
             {
                 //where N is the normalised surface normal vector for a sphere
@@ -189,7 +189,7 @@ namespace NEA_prototype_V1._2
 
                 //where N is the normalised surface normal vector for a sphere
                 Point3 hit_point = r.At(surface_point);
-                Vector3 N = new Vector3(2*hit_point.X,,).Unit_Vector();
+                Vector3 N = new Vector3(2 * hit_point.X, 2 * hit_point.Y, hit_point.Z).Unit_Vector();
 
                 //return as colour
                 return new Colour3(N.X + 1, N.Y + 1, N.Z + 1).Scalar_Divide(2);
