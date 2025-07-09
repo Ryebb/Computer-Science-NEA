@@ -157,9 +157,10 @@ namespace NEA_prototype_V1._2
         {
             Point3 oc = centre.Subtract(r.Orig);
             //given equation x^t A x + B^t x + C, we should define A, B and C
-            Matrix3 A = new Matrix3(1, 0, 0, 0, -1, 0, 0, 0, 0);
+            Matrix3 A = new Matrix3(new double[3, 3] { { 1, 0, 0 }, { 0, -1, 0 }, { 0, 0, 0 } });
             Matrix1 B = new Matrix1(0, 0, -1);
             double C = centre.X + centre.Y + centre.Z;
+
             //given b^2 - 4ac discriminant, to define a b and c:
             double a = A.Pre_Multiply(r.Dir).Dot(r.Dir);
             double b = 2.0 * (A.Pre_Multiply(r.Dir).Dot(r.Orig)) + B.Dot(r.Dir);
